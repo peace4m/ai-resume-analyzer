@@ -3,7 +3,7 @@ import { Welcome } from "../welcome/welcome";
 import Navbar from "~/Components/Navbar";
 import ResumeCard from "~/Components/ResumeCard";
 // @ts-ignore
-import {resumes} from "../../Constants";
+import {resumes} from "../../constants";
 import {usePuterStore} from "~/Lib/puter";
 import {useLocation, useNavigate} from "react-router";
 import {useEffect} from "react";
