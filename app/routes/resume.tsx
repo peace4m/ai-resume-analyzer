@@ -15,12 +15,13 @@ const Resume = () => {
     const { id } = useParams();
     const [imageUrl, setImageUrl] = useState('');
     const [resumeUrl, setResumeUrl] = useState('');
-    const [feedbackUrl, setFeedbackUrl] = useState<Feedback | null>(null);
-    const navigate = useNavigate();
+    const [feedbackUrl, setFeedbackUrl] = useState<any>(null);    const navigate = useNavigate();
 
     useEffect(() => {
-        if (!isLoading && !auth.isAuthenticated) navigate(`/auth?next=/resume${id}`);
-    }, [isLoading])
+        if (!isLoading && !auth.isAuthenticated) {
+            navigate(`/auth?next=/resume/${id}`);
+        }
+    }, [isLoading, auth, navigate, id]);
 
     useEffect(() => {
         const loadResume= async () => {
@@ -59,7 +60,7 @@ const Resume = () => {
                 </Link>
             </nav>
             <div className="flex flex-row w-full max-lg:flex-col-reverse">
-                <section className="feedback-section bg-[url('/images/bg-small.svg)] bg-cover h-[100vh] sticky top-0 items-center justify-center">
+                <section className="feedback-section bg-[url('/images/bg-small.svg')] bg-cover h-[100vh] sticky top-0 items-center justify-center">
                     {imageUrl && resumeUrl && (
                         <div className="animate-in fade-in duration-1000 gradient-border max-sm:m-0 h-[90%] max-w-xl:h-fit w-fit">
                             <a href={resumeUrl} target="_blank" rel="noreferrer">
@@ -77,9 +78,12 @@ const Resume = () => {
                     <h2 className="text-4xl !text-black font-bold">Resume Review</h2>
                     {feedbackUrl ? (
                         <div className="flex flex-col gap-8 animate-in fade-in duration-1000">
-                            <Summary feedback={feedback} />
-                            <ATS score={feedback.ATS.score || 0} suggestions={feedback.ATS.tips || []} />
-                            <Details feedback={feedback} />
+                            <Summary feedback={feedbackUrl} />
+                            <ATS
+                                score={feedbackUrl?.ATS?.score ?? 0}
+                                suggestions={feedbackUrl?.ATS?.tips ?? []}
+                            />
+                            <Details feedback={feedbackUrl} />
                         </div>
                     ) : (
                         <img src="/images/resume-scan-2.gif" className="w-full"/>
