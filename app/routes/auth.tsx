@@ -1,6 +1,6 @@
 import React from 'react'
 import {useEffect} from "react";
-import {usePuterStore} from "~/Lib/puter";
+import {usePuterStore} from "~/lib/puter";
 import {useLocation, useNavigate} from "react-router";
 
 export const meta = () => ([

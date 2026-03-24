@@ -1,13 +1,12 @@
 import React, { type FormEvent } from "react";
 import { useState } from "react";
-import Navbar from "~/Components/Navbar";
-import Fileuploader from "~/Components/Fileuploader";
-import {usePuterStore} from "~/Lib/puter";
+import Navbar from "~/components/Navbar";
+import Fileuploader from "~/components/Fileuploader";
+import { usePuterStore } from "~/lib/puter";
 import { useNavigate } from "react-router";
-import {convertPdfToImage} from "~/Lib/pdf2img";
-import {generateUUID} from "~/Lib/utils";
-import {prepareInstructions} from "../../constants";
-
+import { convertPdfToImage } from "~/lib/pdf2img";
+import { generateUUID } from "~/lib/utils";
+import { prepareInstructions } from "../../constants";
 
 const Upload = () => {
     const { auth, isLoading, fs, ai, kv } = usePuterStore();

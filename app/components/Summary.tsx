@@ -1,5 +1,5 @@
 import React from "react";
-import ScoreGauge from "~/Components/ScoreGauge";
+import ScoreGauge from "~/components/ScoreGauge";
 
 function ScoreBadge(props: { score: number }) {
     return null;

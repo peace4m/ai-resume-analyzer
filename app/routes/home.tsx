@@ -1,9 +1,9 @@
 import type { Route } from "./+types/home";
 import { Welcome } from "../welcome/welcome";
-import Navbar from "~/Components/Navbar";
-import ResumeCard from "~/Components/ResumeCard";
+import Navbar from "~/components/Navbar";
+import ResumeCard from "~/components/ResumeCard";
 import {resumes} from "../../constants";
-import {usePuterStore} from "~/Lib/puter";
+import {usePuterStore} from "~/lib/puter";
 import {Link, useNavigate} from "react-router";
 import {useEffect, useState} from "react";
 
