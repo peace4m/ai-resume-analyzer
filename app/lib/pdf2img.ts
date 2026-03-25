@@ -15,8 +15,8 @@ async function loadPdfJs(): Promise<any> {
   isLoading = true;
   // @ts-expect-error - pdfjs-dist/build/pdf.mjs is not a module
   loadPromise = import("pdfjs-dist/build/pdf.mjs").then((lib) => {
-    // Set the worker source to use local file
-    lib.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.mjs";
+    // Force Vercel to pull the worker from a public CDN so it never gets lost
+    lib.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${lib.version}/build/pdf.worker.min.mjs`;
     pdfjsLib = lib;
     isLoading = false;
     return lib;
