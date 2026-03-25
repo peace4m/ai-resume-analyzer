@@ -54,14 +54,23 @@ const Upload = () => {
         )
         if (!feedback) return  setStatusText('Error: Failed to analyze resume');
 
-        const feedbackText= typeof feedback.message.content === 'string'
+        let feedbackText = typeof feedback.message.content === 'string'
             ? feedback.message.content
             : feedback.message.content[0].text;
-        data.feedback = JSON.parse(feedbackText);
-        await kv.set(`resume:${uuid}`, JSON.stringify(data));
-        setStatusText('Analysis complete, redirecting...');
-        console.log(data);
-        navigate(`/resume/${uuid}`);
+
+        // This strips out the Markdown backticks that cause the silent crash
+        feedbackText = feedbackText.replace(/```json/gi, '').replace(/```/g, '').trim();
+
+        try {
+            data.feedback = JSON.parse(feedbackText);
+            await kv.set(`resume:${uuid}`, JSON.stringify(data));
+            setStatusText('Analysis complete, redirecting...');
+            console.log(data);
+            navigate(`/resume/${uuid}`);
+        } catch (error) {
+            console.error("AI Output crash:", error, feedbackText);
+            setStatusText('Error: AI returned invalid format. Please try again.');
+        }
     }
 
     const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
