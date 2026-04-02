@@ -21,55 +21,71 @@ const Upload = () => {
 
     const handleanalyze = async ({ companyName, jobTitle, jobDescription, file }: { companyName: string, jobTitle: string, jobDescription: string, file: File}) => {
         setIsProcessing(true);
-        setStatusText('Uploading the file...');
-
-        const uploadedFile = await fs.upload([file]);
-        if (!uploadedFile) return  setStatusText('Error: Failed to upload file');
-
-        setStatusText('Converting to image...');
-        const imageFile = await convertPdfToImage(file);
-        if (!imageFile?.file) return setStatusText('Error: Failed to convert PDF to image');
-
-        setStatusText('Uploading the image...');
-        const uploadedImage = await fs.upload([imageFile.file]);
-        if (!uploadedImage) return setStatusText('Error: Failed to upload image');
-        setStatusText('Preparing data...');
-
-        const uuid = generateUUID();
-
-        const data = {
-            id: uuid,
-            resumePath: uploadedFile.path,
-            imagePath: uploadedImage.path,
-            companyName, jobTitle, jobDescription,
-            feedback:'',
-        }
-        await kv.set(`resume:${uuid}`, JSON.stringify(data));
-
-        setStatusText('Analyzing...');
-
-        const feedback = await ai.feedback(
-            uploadedFile.path,
-            prepareInstructions({ jobTitle, jobDescription })
-        )
-        if (!feedback) return  setStatusText('Error: Failed to analyze resume');
-
-        let feedbackText = typeof feedback.message.content === 'string'
-            ? feedback.message.content
-            : feedback.message.content[0].text;
-
-        // This strips out the Markdown backticks that cause the silent crash
-        feedbackText = feedbackText.replace(/```json/gi, '').replace(/```/g, '').trim();
 
         try {
-            data.feedback = JSON.parse(feedbackText);
+            setStatusText('Uploading the file...');
+            const uploadedFile = await fs.upload([file]);
+            if (!uploadedFile) throw new Error("Failed to upload file to Puter");
+
+            setStatusText('Converting to image...');
+            const imageFile = await convertPdfToImage(file);
+            if (!imageFile?.file) throw new Error("Failed to convert PDF to image");
+
+            setStatusText('Uploading the image...');
+            const uploadedImage = await fs.upload([imageFile.file]);
+            if (!uploadedImage) throw new Error("Failed to upload image to Puter");
+
+            setStatusText('Preparing data...');
+            const uuid = generateUUID();
+
+            const data = {
+                id: uuid,
+                resumePath: uploadedFile.path,
+                imagePath: uploadedImage.path,
+                companyName, jobTitle, jobDescription,
+                feedback: '',
+            };
+
             await kv.set(`resume:${uuid}`, JSON.stringify(data));
+
+            setStatusText('Analyzing... (This might take up to 60 seconds)');
+
+            const feedback = await ai.feedback(
+                uploadedFile.path,
+                prepareInstructions({ jobTitle, jobDescription })
+            );
+
+            if (!feedback) throw new Error("AI returned empty feedback");
+
+            let feedbackText = typeof feedback.message.content === 'string'
+                ? feedback.message.content
+                : feedback.message.content[0].text;
+
+            // Strip out Markdown backticks
+            feedbackText = feedbackText.replace(/```json/gi, '').replace(/```/g, '').trim();
+
+            data.feedback = JSON.parse(feedbackText);
+
+            await kv.set(`resume:${uuid}`, JSON.stringify(data));
+
             setStatusText('Analysis complete, redirecting...');
             console.log(data);
             navigate(`/resume/${uuid}`);
-        } catch (error) {
-            console.error("AI Output crash:", error, feedbackText);
-            setStatusText('Error: AI returned invalid format. Please try again.');
+
+        } catch (error: any) {
+            console.error("FATAL CRASH:", error);
+
+            // This extracts the exact hidden Puter error and puts it on your screen
+            let errorMsg = "Unknown Error";
+            if (typeof error === 'object' && error !== null) {
+                errorMsg = error.message || JSON.stringify(error);
+            } else {
+                errorMsg = String(error);
+            }
+
+            setStatusText(`Crash Error: ${errorMsg}`);
+            // Give them the ability to click the button again without refreshing
+            setTimeout(() => setIsProcessing(false), 5000);
         }
     }
 
